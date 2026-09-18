@@ -46,12 +46,28 @@ The generated markdown follows this structure:
 | `Component Rule Expectations` | Defines required interaction/state details. |
 | `Quality Gates` | Adds testable quality and consistency checks. |
 
+## Website
+
+A marketing site with an interactive live demo of the extractor pipeline is deployed at **https://design-md-chrome.vercel.app/**. The static source lives in [`public/`](./public) and deploys to Vercel.
+
 ## Local development
 
 Run tests locally:
 
 ```bash
 node tests/run-tests.mjs
+```
+
+Preview the website locally:
+
+```bash
+python3 -m http.server 8080 --directory public
+```
+
+Deploy the website to Vercel (requires `vercel` CLI login and the `design-md-chrome` project):
+
+```bash
+vercel deploy --prod --yes
 ```
 
 ## License
