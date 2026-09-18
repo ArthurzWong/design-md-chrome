@@ -1,0 +1,1198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DESIGN.md Style Extractor for Chrome — by TypeUI</title>
+<meta name="description" content="Extract any website's design system — typography, colors, spacing, radius, shadows, motion — and generate a DESIGN.md or SKILL.md blueprint for Claude Code, Codex, Cursor, and Google Stitch." />
+<meta property="og:title" content="DESIGN.md Style Extractor for Chrome — by TypeUI" />
+<meta property="og:description" content="Turn any website's design into a DESIGN.md blueprint your AI coding tools can build with. Free, open-source Chrome extension." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://design-md-chrome.vercel.app/" />
+<meta property="og:image" content="https://github.com/user-attachments/assets/64efbebb-1c68-4ca1-8792-ca167d5e12d6" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111'/%3E%3Cpath d='M9 21V11h3.2c2.9 0 4.8 1.9 4.8 5s-1.9 5-4.8 5H9z' fill='%23fff'/%3E%3Cpath d='M20 11h4M20 16h3M20 21h4' stroke='%233E63DD' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #fafaf9;
+    --bg-raised: #ffffff;
+    --ink: #141414;
+    --text: #1f1f1f;
+    --muted: #6d6d6d;
+    --faint: #9b9b9b;
+    --line: #e8e6e3;
+    --line-strong: #d6d3cf;
+    --accent: #3e63dd;
+    --accent-ink: #2b4bc4;
+    --accent-soft: #eef2ff;
+    --ok: #0e9f6e;
+    --warn: #b45309;
+    --err: #b91c1c;
+    --black: #111111;
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.05);
+    --shadow-md: 0 8px 24px rgba(20, 20, 20, 0.08);
+    --shadow-lg: 0 24px 64px rgba(20, 20, 20, 0.14);
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.001s !important; transition-duration: 0.001s !important; }
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  a { color: inherit; }
+  button { font: inherit; }
+  ::selection { background: #dce4ff; }
+
+  .container { width: min(1120px, 100% - 40px); margin-inline: auto; }
+  .mono { font-family: var(--mono); }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(250, 250, 249, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .nav.scrolled { border-bottom-color: var(--line); box-shadow: var(--shadow-sm); }
+  .nav-inner { display: flex; align-items: center; gap: 28px; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; letter-spacing: -0.02em; font-size: 15px; }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 7px; background: var(--black); color: #fff;
+    display: grid; place-items: center; font-family: var(--mono); font-size: 13px; font-weight: 700;
+    box-shadow: var(--shadow-sm);
+  }
+  .brand-mark em { color: #8ea2ff; font-style: normal; }
+  .brand small { font-weight: 500; color: var(--muted); font-size: 12px; margin-left: 2px; }
+  .nav-links { display: flex; gap: 4px; margin-left: auto; }
+  .nav-links a {
+    text-decoration: none; color: var(--muted); font-size: 13.5px; font-weight: 500;
+    padding: 7px 11px; border-radius: 8px; transition: color .15s ease, background .15s ease;
+  }
+  .nav-links a:hover { color: var(--ink); background: rgba(20,20,20,0.05); }
+  .nav-cta { display: flex; align-items: center; gap: 10px; }
+  .gh-link {
+    display: inline-flex; align-items: center; gap: 7px; text-decoration: none;
+    color: var(--text); font-size: 13px; font-weight: 600;
+    border: 1px solid var(--line-strong); border-radius: 9px; padding: 7px 12px;
+    background: var(--bg-raised); box-shadow: var(--shadow-sm);
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .gh-link:hover { border-color: var(--ink); transform: translateY(-1px); }
+  @media (max-width: 860px) { .nav-links { display: none; } .nav-inner { justify-content: space-between; } }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border-radius: 10px; padding: 11px 18px; font-size: 14px; font-weight: 600;
+    cursor: pointer; text-decoration: none; border: 1px solid transparent;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease, color .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--black); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { background: #000; box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .btn-ghost { background: var(--bg-raised); color: var(--ink); border-color: var(--line-strong); box-shadow: var(--shadow-sm); }
+  .btn-ghost:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .btn-sm { padding: 8px 13px; font-size: 13px; border-radius: 8px; }
+  :is(a, button):focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px;
+  }
+  .btn[disabled], .icon-btn[disabled] { opacity: .45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+
+  /* ---------- Hero ---------- */
+  .hero { position: relative; overflow: hidden; padding: 84px 0 64px; }
+  .hero-bg { position: absolute; inset: 0; pointer-events: none; }
+  .hero-bg::before {
+    content: ""; position: absolute; top: -320px; left: 50%; transform: translateX(-50%);
+    width: 1100px; height: 640px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(62, 99, 221, 0.14), rgba(120, 88, 255, 0.07) 55%, transparent 75%);
+    filter: blur(6px);
+  }
+  .hero-bg::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(20,20,20,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(20,20,20,0.045) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 30%, transparent 75%);
+  }
+  .hero-inner { position: relative; text-align: center; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 12px; color: var(--accent-ink);
+    background: var(--accent-soft); border: 1px solid #dce3fb;
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 22px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  h1.hero-title {
+    margin: 0 auto 18px; max-width: 15ch;
+    font-size: clamp(38px, 6.4vw, 68px); line-height: 1.04; letter-spacing: -0.035em; font-weight: 800; color: var(--ink);
+  }
+  .hero-title .accent { color: var(--accent); }
+  .hero-sub { margin: 0 auto 30px; max-width: 62ch; font-size: clamp(16px, 2vw, 18.5px); color: var(--muted); }
+  .hero-sub strong { color: var(--text); font-weight: 600; }
+  .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .hero-note { font-size: 13px; color: var(--faint); }
+  .hero-note code { font-family: var(--mono); font-size: 12px; background: #f0efec; border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; }
+
+  /* hero product shot */
+  .hero-shot { position: relative; margin: 54px auto 0; max-width: 880px; }
+  .hero-shot-frame {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg); overflow: hidden; text-align: left;
+  }
+  .chrome-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f7f6f4; }
+  .chrome-dots { display: flex; gap: 6px; }
+  .chrome-dots i { width: 10px; height: 10px; border-radius: 50%; }
+  .chrome-dots i:nth-child(1) { background: #ff5f57; } .chrome-dots i:nth-child(2) { background: #febc2e; } .chrome-dots i:nth-child(3) { background: #28c840; }
+  .chrome-url {
+    flex: 1; margin-left: 8px; font-family: var(--mono); font-size: 11.5px; color: var(--muted);
+    background: #fff; border: 1px solid var(--line); border-radius: 7px; padding: 4px 10px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hero-shot-body { display: grid; grid-template-columns: 1.1fr .9fr; min-height: 360px; }
+  .shot-site { padding: 26px 26px 20px; border-right: 1px solid var(--line); position: relative; }
+  .shot-site::after {
+    content: "active tab"; position: absolute; top: 12px; right: 14px;
+    font-family: var(--mono); font-size: 10px; color: var(--faint);
+    border: 1px dashed var(--line-strong); border-radius: 5px; padding: 2px 7px;
+  }
+  .shot-popup { padding: 18px; background: #fcfcfb; }
+  .float-chip {
+    position: absolute; z-index: 2; display: inline-flex; align-items: center; gap: 7px;
+    background: var(--bg-raised); border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 6px 11px; font-family: var(--mono); font-size: 11px; color: var(--text);
+    box-shadow: var(--shadow-md); animation: floaty 6s ease-in-out infinite;
+  }
+  .float-chip .sw { width: 11px; height: 11px; border-radius: 4px; border: 1px solid rgba(0,0,0,.12); }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @media (max-width: 760px) {
+    .hero { padding: 60px 0 44px; }
+    .hero-shot-body { grid-template-columns: 1fr; }
+    .shot-site { border-right: 0; border-bottom: 1px solid var(--line); }
+    .float-chip { display: none; }
+  }
+
+  /* ---------- Sections ---------- */
+  .section { padding: 84px 0; }
+  .section-head { max-width: 720px; margin: 0 auto 46px; text-align: center; }
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); font-weight: 600; }
+  h2.section-title { margin: 10px 0 12px; font-size: clamp(26px, 3.6vw, 38px); letter-spacing: -0.03em; line-height: 1.12; color: var(--ink); font-weight: 800; }
+  .section-sub { color: var(--muted); font-size: 16px; margin: 0; }
+
+  /* pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .pipe-step {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px 14px 14px; box-shadow: var(--shadow-sm); position: relative;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .pipe-step:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--line-strong); }
+  .pipe-num { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); font-weight: 700; }
+  .pipe-name { font-weight: 700; font-size: 14px; color: var(--ink); margin: 6px 0 4px; letter-spacing: -0.01em; }
+  .pipe-desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+  @media (max-width: 900px) { .pipeline { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .pipeline { grid-template-columns: 1fr; } }
+
+  /* ---------- Demo ---------- */
+  .demo { background: linear-gradient(180deg, #f4f4f2, var(--bg)); border-block: 1px solid var(--line); }
+  .demo-shell {
+    display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); align-items: stretch; gap: 0;
+  }
+  .demo-pane {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md); overflow: hidden; display: flex; flex-direction: column; min-height: 520px;
+  }
+  .demo-arrow { display: grid; place-items: center; color: var(--faint); }
+  .demo-arrow svg { width: 26px; height: 26px; }
+  @media (max-width: 980px) {
+    .demo-shell { grid-template-columns: 1fr; gap: 14px; }
+    .demo-arrow { transform: rotate(90deg); padding: 2px 0; }
+    .demo-pane { min-height: 0; }
+  }
+
+  .pane-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: #f7f6f4;
+  }
+  .pane-title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; color: var(--muted); font-family: var(--mono); }
+  .pane-title .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px rgba(14,159,110,.15); }
+  .mode-switch { display: inline-flex; background: #ecebe8; border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 3px; }
+  .mode-btn {
+    border: 1px solid transparent; background: transparent; color: var(--muted);
+    border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+    font-family: var(--mono); transition: all .15s ease;
+  }
+  .mode-btn:hover { color: var(--ink); }
+  .mode-btn.is-active { background: var(--black); color: #fff; border-color: var(--black); }
+
+  /* sample site inside demo */
+  .sample-site { padding: 26px; flex: 1; background: #fdfdfb; }
+  .ss-nav { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+  .ss-logo { font-weight: 800; letter-spacing: -0.02em; font-size: 15px; color: #16161d; display: flex; align-items: center; gap: 8px; }
+  .ss-logo i { width: 16px; height: 16px; border-radius: 5px; background: #3e63dd; display: inline-block; }
+  .ss-links { display: flex; gap: 14px; margin-left: auto; font-size: 12.5px; color: #5f6368; }
+  .ss-btn { border-radius: 8px; padding: 8px 14px; font-size: 12.5px; font-weight: 600; cursor: default; border: 1px solid transparent; }
+  .ss-btn.primary { background: #16161d; color: #fff; }
+  .ss-btn.accent { background: #3e63dd; color: #fff; }
+  .ss-btn.outline { background: #fff; color: #16161d; border-color: #d8dade; }
+  .ss-h1 { font-size: 34px; line-height: 1.12; letter-spacing: -0.03em; color: #16161d; margin: 0 0 12px; font-weight: 800; }
+  .ss-p { color: #5f6368; font-size: 15px; max-width: 44ch; margin: 0 0 20px; }
+  .ss-cta-row { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+  .ss-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .ss-card { background: #fff; border: 1px solid #e6e8eb; border-radius: 10px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+  .ss-card b { display: block; font-size: 13px; color: #16161d; margin: 8px 0 4px; }
+  .ss-card span { font-size: 12px; color: #6b7075; line-height: 1.5; }
+  .ss-ic { width: 26px; height: 26px; border-radius: 6px; background: #eef2ff; display: grid; place-items: center; color: #3e63dd; }
+  .ss-ic svg { width: 14px; height: 14px; }
+  @media (max-width: 520px) { .ss-cards { grid-template-columns: 1fr; } .ss-links { display: none; } }
+
+  /* demo controls */
+  .demo-controls { padding: 14px; border-top: 1px solid var(--line); background: #fcfcfb; display: flex; flex-direction: column; gap: 12px; }
+  .extract-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .extract-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--black); color: #fff; border: 1px solid var(--black);
+    border-radius: 9px; padding: 10px 18px; font-size: 13.5px; font-weight: 600; cursor: pointer;
+    box-shadow: var(--shadow-sm); transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
+  }
+  .extract-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .extract-btn:disabled { opacity: .6; cursor: progress; }
+  .extract-btn .spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  .extract-btn.busy .spinner { display: inline-block; }
+  .extract-btn.busy .btn-icon { display: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .extract-hint { font-size: 12px; color: var(--faint); }
+
+  .steps { display: grid; gap: 5px; }
+  .step { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--faint); font-family: var(--mono); transition: color .2s ease; min-height: 20px; }
+  .step .box { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid var(--line-strong); display: grid; place-items: center; background: #fff; flex-shrink: 0; transition: all .2s ease; }
+  .step .box svg { width: 9px; height: 9px; opacity: 0; color: #fff; }
+  .step.active { color: var(--text); }
+  .step.active .box { border-color: var(--accent); background: var(--accent-soft); }
+  .step.done { color: var(--muted); }
+  .step.done .box { border-color: var(--ok); background: var(--ok); }
+  .step.done .box svg { opacity: 1; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; min-height: 26px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 11px; color: var(--text);
+    background: #fff; border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 10px;
+    animation: chipIn .35s ease both;
+  }
+  .chip .sw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(0,0,0,.14); }
+  .chip b { font-weight: 700; }
+  .chip.pass { border-color: #bfe8d8; background: #f2fbf7; color: #0b7a55; }
+  @keyframes chipIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+  /* output pane */
+  .out-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .out-empty {
+    flex: 1; display: grid; place-items: center; padding: 30px; text-align: center;
+    color: var(--faint); font-family: var(--mono); font-size: 12.5px; line-height: 1.8;
+  }
+  .out-empty .glyph { font-size: 26px; color: var(--line-strong); display: block; margin-bottom: 8px; }
+  pre.out {
+    flex: 1; margin: 0; padding: 16px 18px; overflow: auto; max-height: 430px;
+    background: #16161a; color: #d6d3cd; font-family: var(--mono); font-size: 12px; line-height: 1.62;
+    white-space: pre-wrap; word-break: break-word;
+  }
+  pre.out .md-h { color: #9db4ff; font-weight: 700; }
+  pre.out .md-b { color: #8a8f98; }
+  pre.out .md-t { color: #d6d3cd; }
+  .out-foot { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); background: #fcfcfb; flex-wrap: wrap; }
+  .out-meta { font-family: var(--mono); font-size: 11px; color: var(--faint); margin-right: auto; }
+  .icon-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff; color: var(--text); border: 1px solid var(--line-strong);
+    border-radius: 8px; padding: 7px 12px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+    box-shadow: var(--shadow-sm); transition: all .15s ease;
+  }
+  .icon-btn:hover:not(:disabled) { border-color: var(--ink); transform: translateY(-1px); }
+  .icon-btn svg { width: 13px; height: 13px; }
+  .icon-btn.copied { background: var(--ok); border-color: var(--ok); color: #fff; }
+
+  /* ---------- Features ---------- */
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .feature {
+    background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 22px; box-shadow: var(--shadow-sm);
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .feature:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--line-strong); }
+  .feature-ic {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-ink);
+    display: grid; place-items: center; margin-bottom: 14px;
+  }
+  .feature-ic svg { width: 18px; height: 18px; }
+  .feature h3 { margin: 0 0 6px; font-size: 15.5px; letter-spacing: -0.01em; color: var(--ink); }
+  .feature p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  @media (max-width: 900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .features-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Format table ---------- */
+  .format-wrap { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg-raised); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .format-row { display: grid; grid-template-columns: 260px 1fr; border-bottom: 1px solid var(--line); }
+  .format-row:last-child { border-bottom: 0; }
+  .format-row dt {
+    margin: 0; padding: 14px 18px; font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--ink);
+    background: #fbfaf9; border-right: 1px solid var(--line);
+  }
+  .format-row dd { margin: 0; padding: 14px 18px; font-size: 13.5px; color: var(--muted); }
+  @media (max-width: 640px) {
+    .format-row { grid-template-columns: 1fr; }
+    .format-row dt { border-right: 0; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+    .format-row dd { padding-top: 10px; }
+  }
+
+  /* ---------- Install ---------- */
+  .install-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; counter-reset: step; }
+  .install-card { position: relative; background: var(--bg-raised); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 22px; box-shadow: var(--shadow-sm); }
+  .install-num {
+    counter-increment: step; display: inline-grid; place-items: center;
+    width: 30px; height: 30px; border-radius: 9px; background: var(--black); color: #fff;
+    font-family: var(--mono); font-size: 13px; font-weight: 700; margin-bottom: 14px;
+  }
+  .install-num::before { content: counter(step); }
+  .install-card h3 { margin: 0 0 6px; font-size: 15.5px; color: var(--ink); }
+  .install-card p { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .install-card code {
+    font-family: var(--mono); font-size: 12px; background: #f0efec; border: 1px solid var(--line);
+    padding: 1px 7px; border-radius: 6px; color: var(--ink); white-space: nowrap;
+  }
+  .providers { margin-top: 26px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .providers span { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .provider-pill {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    background: var(--bg-raised); border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 8px 15px; font-size: 13px; font-weight: 600; color: var(--ink); box-shadow: var(--shadow-sm);
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .provider-pill:hover { transform: translateY(-1px); border-color: var(--ink); }
+  .provider-pill img { width: 15px; height: 15px; object-fit: contain; }
+  .provider-pill code { font-family: var(--mono); font-size: 11px; color: var(--faint); font-weight: 500; }
+  @media (max-width: 860px) { .install-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- CTA band ---------- */
+  .cta-band { background: #101013; color: #fff; border-radius: 24px; padding: 60px 40px; text-align: center; position: relative; overflow: hidden; }
+  .cta-band::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 50% 120%, rgba(62,99,221,.35), transparent 70%);
+  }
+  .cta-band > * { position: relative; }
+  .cta-band h2 { margin: 0 0 10px; font-size: clamp(24px, 3.4vw, 34px); letter-spacing: -0.03em; }
+  .cta-band p { margin: 0 auto 26px; max-width: 54ch; color: #a3a3ad; font-size: 15px; }
+  .cta-band .btn-ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.25); }
+  .cta-band .btn-ghost:hover { border-color: #fff; }
+  .cta-band .btn-primary { background: #fff; color: #101013; }
+  .cta-band .btn-primary:hover { box-shadow: 0 10px 30px rgba(255,255,255,.15); }
+
+  /* ---------- Footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 40px 0 56px; margin-top: 84px; }
+  .foot-inner { display: flex; gap: 30px; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; }
+  .foot-brand { max-width: 320px; }
+  .foot-brand p { font-size: 12.5px; color: var(--faint); margin: 10px 0 0; line-height: 1.6; }
+  .foot-cols { display: flex; gap: 56px; flex-wrap: wrap; }
+  .foot-col h4 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--faint); font-family: var(--mono); }
+  .foot-col a { display: block; font-size: 13.5px; color: var(--muted); text-decoration: none; padding: 3px 0; }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-note { margin-top: 34px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--faint); }
+
+  /* ---------- Reveal ---------- */
+  .reveal { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav" aria-label="Main">
+  <div class="container nav-inner">
+    <a class="brand" href="#top" aria-label="DESIGN.md extractor home">
+      <span class="brand-mark" aria-hidden="true">D<em>.</em>md</span>
+      <span>DESIGN.md extractor <small>by TypeUI</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#demo">Live demo</a>
+      <a href="#features">Features</a>
+      <a href="#format">File format</a>
+      <a href="#install">Install</a>
+    </div>
+    <div class="nav-cta">
+      <a class="gh-link" href="https://github.com/ArthurzWong/design-md-chrome" target="_blank" rel="noopener noreferrer">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+      <a class="btn btn-primary btn-sm" href="#install">Get the extension</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <div class="container hero-inner">
+    <span class="eyebrow"><span class="dot" aria-hidden="true"></span>Free &amp; open-source Chrome extension · v0.4.0</span>
+    <h1 class="hero-title">Turn any website's design into a <span class="accent">DESIGN.md</span> blueprint</h1>
+    <p class="hero-sub">One click extracts typography, colors, spacing, radius, shadows, and motion from the active tab — then generates a <strong>DESIGN.md</strong> or <strong>SKILL.md</strong> that Claude&nbsp;Code, Codex, Cursor, and Google&nbsp;Stitch can build with.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#install">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install in Chrome
+      </a>
+      <a class="btn btn-ghost" href="#demo">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        Try the live demo
+      </a>
+    </div>
+    <p class="hero-note">No signup · works on any page · output follows the open <a href="https://www.typeui.sh/design-md" target="_blank" rel="noopener noreferrer" style="color:var(--text)">TypeUI DESIGN.md</a> format</p>
+
+    <!-- product shot -->
+    <div class="hero-shot reveal" aria-hidden="true">
+      <span class="float-chip" style="top: 8%; left: 4%;"><span class="sw" style="background:#3E63DD"></span>accent: #3E63DD</span>
+      <span class="float-chip" style="top: 18%; right: 3%; animation-delay: -2s;">type scale ×6</span>
+      <span class="float-chip" style="bottom: 10%; left: 7%; animation-delay: -4s;"><span class="sw" style="background:#16161D"></span>ink: #16161D</span>
+      <div class="hero-shot-frame">
+        <div class="chrome-bar">
+          <div class="chrome-dots"><i></i><i></i><i></i></div>
+          <span class="chrome-url">chrome://extensions · DESIGN.md Style Extractor — TypeUI</span>
+        </div>
+        <div class="hero-shot-body">
+          <div class="shot-site">
+            <div class="ss-nav" style="margin-bottom:24px">
+              <span class="ss-logo"><i></i>Aurora</span>
+              <span class="ss-links" style="font-size:12px">Product · Docs · Pricing</span>
+              <span class="ss-btn accent" style="margin-left:auto;padding:6px 12px">Get started</span>
+            </div>
+            <p class="ss-h1" style="font-size:28px;margin-bottom:8px">Analytics that feel effortless</p>
+            <p class="ss-p" style="font-size:13px;margin-bottom:16px">Dashboards, alerts, and reports your whole team will actually use.</p>
+            <div class="ss-cta-row" style="margin-bottom:20px">
+              <span class="ss-btn accent">Start free</span>
+              <span class="ss-btn outline">Book a demo</span>
+            </div>
+            <div class="ss-cards">
+              <div class="ss-card"><span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span><b>Realtime</b><span>Sub-second metrics</span></div>
+              <div class="ss-card"><span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><b>Secure</b><span>SSO &amp; audit logs</span></div>
+              <div class="ss-card"><span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m13 2-2 9h6l-8 11 2-9H5l8-11z"/></svg></span><b>Fast</b><span>Queries under 100ms</span></div>
+            </div>
+          </div>
+          <div class="shot-popup mono" style="font-size:11.5px; line-height:1.7; color:#8a8f98">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+              <span style="width:18px;height:18px;border-radius:5px;background:#111;color:#fff;display:grid;place-items:center;font-size:9px;font-weight:700">D</span>
+              <b style="color:#111">DESIGN.md extractor</b>
+              <span style="margin-left:auto;border:1px solid #e8e6e3;border-radius:999px;padding:2px 8px;font-size:10px">v0.4.0</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:12px">
+              <span style="background:#111;color:#fff;border-radius:7px;padding:6px;text-align:center;font-weight:600">DESIGN.md</span>
+              <span style="border:1px solid #e8e6e3;border-radius:7px;padding:6px;text-align:center;color:#555">SKILL.md</span>
+            </div>
+            <div style="border:1px solid #e8e6e3;border-radius:8px;background:#fff;padding:10px 12px">
+              <span style="color:#9db4ff;font-weight:700"># Aurora Analytics</span><br>
+              <span style="color:#8a8f98">## Mission</span><br>
+              Create implementation-ready,<br>token-driven UI guidance…<br>
+              <span style="color:#8a8f98">## Style Foundations</span><br>
+              <span style="color:#d6d3cd">- Typography scale: 12 · 14 · 16 · 20 · 28 · 40</span><br>
+              <span style="color:#d6d3cd">- Color palette: ink #16161D · paper #FDFDFB…</span><br>
+              <span style="color:#d6d3cd">- Spacing scale: 4 · 8 · 12 · 16 · 24 · 32…</span><br>
+              <span style="color:#8a8f98">## Quality Gates</span><br>
+              <span style="color:#0e9f6e">✓ passed 9/9 checks</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:12px">
+              <span style="border:1px solid #e8e6e3;border-radius:7px;padding:5px 10px;background:#10b981;color:#fff;font-weight:600">✓ Copied</span>
+              <span style="border:1px solid #e8e6e3;border-radius:7px;padding:5px 10px;background:#fff">↓ Download</span>
+              <span style="border:1px solid #e8e6e3;border-radius:7px;padding:5px 10px;background:#fff">⟳ Refresh</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">Pipeline</span>
+      <h2 class="section-title">From pixels to a blueprint in five steps</h2>
+      <p class="section-sub">The extension runs the same structured pipeline the demo below shows — fully on your device.</p>
+    </div>
+    <div class="pipeline reveal">
+      <div class="pipe-step">
+        <span class="pipe-num">01</span>
+        <div class="pipe-name">Style extraction</div>
+        <div class="pipe-desc">Scans visible elements and captures computed typography, colors, spacing, radius, shadows, and motion.</div>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">02</span>
+        <div class="pipe-name">Token normalization</div>
+        <div class="pipe-desc">Deduplicates raw values and groups them into semantic-like token sets.</div>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">03</span>
+        <div class="pipe-name">Website profiling</div>
+        <div class="pipe-desc">Uses URL, metadata, headings, nav labels, and structure to infer brand, audience, and surface.</div>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">04</span>
+        <div class="pipe-name">Blueprint assembly</div>
+        <div class="pipe-desc">Assembles mission, foundations, accessibility, rules, workflow, and quality gates.</div>
+      </div>
+      <div class="pipe-step">
+        <span class="pipe-num">05</span>
+        <div class="pipe-name">Conformance checks</div>
+        <div class="pipe-desc">Validates required headings, frontmatter, accessibility wording, and state coverage.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIVE DEMO ============ -->
+<section class="section demo" id="demo">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">Interactive demo</span>
+      <h2 class="section-title">See exactly what you'll get</h2>
+      <p class="section-sub">This is a real run of the generation logic on a sample site — no install needed. Extract, switch format, copy or download the result.</p>
+    </div>
+
+    <div class="demo-shell reveal">
+      <!-- left: sample site -->
+      <div class="demo-pane">
+        <div class="pane-head">
+          <span class="pane-title"><span class="live-dot" aria-hidden="true"></span>sample-site — active tab</span>
+          <span class="pane-title" style="color:var(--faint)">https://demo.aurora-analytics.example</span>
+        </div>
+        <div class="sample-site" aria-label="Sample website used for the extraction demo">
+          <div class="ss-nav">
+            <span class="ss-logo"><i aria-hidden="true"></i>Aurora</span>
+            <span class="ss-links">Product · Docs · Pricing · Changelog</span>
+            <span class="ss-btn accent">Get started</span>
+          </div>
+          <p class="ss-h1">Analytics that feel effortless</p>
+          <p class="ss-p">Dashboards, alerts, and reports your whole team will actually open. No SQL required, no stale spreadsheets.</p>
+          <div class="ss-cta-row">
+            <span class="ss-btn accent">Start free trial</span>
+            <span class="ss-btn outline">Book a demo</span>
+          </div>
+          <div class="ss-cards">
+            <div class="ss-card">
+              <span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg></span>
+              <b>Realtime metrics</b><span>Sub-second ingestion with live dashboards and shareable links.</span>
+            </div>
+            <div class="ss-card">
+              <span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+              <b>Enterprise-ready</b><span>SSO, SCIM, audit logs, and regional data residency.</span>
+            </div>
+            <div class="ss-card">
+              <span class="ss-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-2 9h6l-8 11 2-9H5l8-11z"/></svg></span>
+              <b>Fast by default</b><span>Columnar engine answers most queries in under 100ms.</span>
+            </div>
+          </div>
+        </div>
+        <div class="demo-controls">
+          <div class="extract-row">
+            <button class="extract-btn" id="extractBtn" type="button">
+              <span class="spinner" aria-hidden="true"></span>
+              <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+              <span id="extractLabel">Run extraction</span>
+            </button>
+            <span class="extract-hint" id="extractHint">Simulates the extension reading the page above.</span>
+          </div>
+          <div class="steps" id="steps" hidden aria-live="polite">
+            <div class="step" data-step="0"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Style extraction — scanning visible elements</div>
+            <div class="step" data-step="1"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Token normalization — dedupe &amp; group</div>
+            <div class="step" data-step="2"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Website profiling — brand &amp; audience</div>
+            <div class="step" data-step="3"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Blueprint assembly — sections &amp; rules</div>
+            <div class="step" data-step="4"><span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Conformance checks — validate output</div>
+          </div>
+          <div class="chips" id="chips" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- arrow -->
+      <div class="demo-arrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="13 5 20 12 13 19"/></svg>
+      </div>
+
+      <!-- right: output -->
+      <div class="demo-pane">
+        <div class="pane-head">
+          <span class="pane-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>generated output</span>
+          <div class="mode-switch" role="tablist" aria-label="Output mode">
+            <button class="mode-btn is-active" id="modeDesign" type="button" role="tab" aria-selected="true">DESIGN.md</button>
+            <button class="mode-btn" id="modeSkill" type="button" role="tab" aria-selected="false">SKILL.md</button>
+          </div>
+        </div>
+        <div class="out-body">
+          <div class="out-empty" id="outEmpty">
+            <span><span class="glyph" aria-hidden="true">⌘</span>Run extraction on the sample site<br>to generate your <span id="emptyMode">DESIGN.md</span> here.</span>
+          </div>
+          <pre class="out" id="outPre" hidden tabindex="0" aria-label="Generated markdown output"></pre>
+        </div>
+        <div class="out-foot">
+          <span class="out-meta" id="outMeta">waiting for extraction…</span>
+          <button class="icon-btn" id="copyBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copyLabel">Copy</span>
+          </button>
+          <button class="icon-btn" id="downloadBtn" type="button" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">Features</span>
+      <h2 class="section-title">Everything you need to brief an AI on your design</h2>
+      <p class="section-sub">Small popup, serious output. Built for people who ship UI with AI tools every day.</p>
+    </div>
+    <div class="features-grid reveal">
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <h3>One-click auto-extract</h3>
+        <p>Reads the active tab and captures typography, color, spacing, radius, shadow, and motion signals as you see them — no config.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <h3>DESIGN.md &amp; SKILL.md</h3>
+        <p>Generate a design-system blueprint or an agent-ready skill file. Both follow the open TypeUI format, ready to paste into your repo.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+        <h3>Quick install to your stack</h3>
+        <p>Drops SKILL.md straight into <span class="mono" style="font-size:11.5px">.claude/skills</span>, <span class="mono" style="font-size:11.5px">.agents/skills</span>, or <span class="mono" style="font-size:11.5px">.cursor/skills</span> via the File System API — with copy/download fallback.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h3>Validated output</h3>
+        <p>Every file passes conformance checks — required headings, frontmatter, WCAG 2.2 AA wording, and full interaction-state coverage.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+        <h3>Explain panel</h3>
+        <p>The <span class="mono" style="font-size:11.5px">?</span> button shows exactly how your file was generated: sample counts, token coverage, profiling evidence, and check results.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg></div>
+        <h3>Private by design</h3>
+        <p>Extraction happens locally in your browser. Nothing is uploaded, no account needed — MIT-licensed and open source.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FORMAT ============ -->
+<section class="section" id="format" style="padding-top: 20px;">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">File format</span>
+      <h2 class="section-title">What's inside the generated file</h2>
+      <p class="section-sub">A structured blueprint AI tools can follow — not a dump of CSS values.</p>
+    </div>
+    <dl class="format-wrap reveal">
+      <div class="format-row"><dt>Mission</dt><dd>Defines the design-system objective for the extracted site.</dd></div>
+      <div class="format-row"><dt>Brand</dt><dd>Captures product context, URL, audience, and product surface.</dd></div>
+      <div class="format-row"><dt>Style Foundations</dt><dd>Lists inferred visual tokens: typography scale, palette, spacing, radius, shadows, motion.</dd></div>
+      <div class="format-row"><dt>Accessibility</dt><dd>Applies WCAG 2.2 AA requirements and interaction constraints.</dd></div>
+      <div class="format-row"><dt>Writing Tone</dt><dd>Sets guidance tone for implementation-ready output.</dd></div>
+      <div class="format-row"><dt>Rules: Do / Don't</dt><dd>Lists required practices and prohibited anti-patterns.</dd></div>
+      <div class="format-row"><dt>Authoring Workflow</dt><dd>Defines ordered guideline authoring steps.</dd></div>
+      <div class="format-row"><dt>Output Structure</dt><dd>Enforces consistent output sections across generations.</dd></div>
+      <div class="format-row"><dt>Component Expectations</dt><dd>Defines required interaction and state details per component.</dd></div>
+      <div class="format-row"><dt>Quality Gates</dt><dd>Adds testable quality and consistency checks.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ INSTALL ============ -->
+<section class="section" id="install" style="background: linear-gradient(180deg, var(--bg), #f4f4f2); border-block: 1px solid var(--line);">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">Get started</span>
+      <h2 class="section-title">Install in under a minute</h2>
+      <p class="section-sub">Load it unpacked from the repo — no store review wait, no account.</p>
+    </div>
+    <div class="install-grid reveal">
+      <div class="install-card">
+        <span class="install-num" aria-hidden="true"></span>
+        <h3>Open the extensions page</h3>
+        <p>Navigate to <code>chrome://extensions</code> in Chrome, Brave, Edge, or any Chromium browser.</p>
+      </div>
+      <div class="install-card">
+        <span class="install-num" aria-hidden="true"></span>
+        <h3>Enable Developer mode</h3>
+        <p>Flip the <strong>Developer mode</strong> toggle in the top-right corner of the extensions page.</p>
+      </div>
+      <div class="install-card">
+        <span class="install-num" aria-hidden="true"></span>
+        <h3>Load the folder</h3>
+        <p>Click <strong>Load unpacked</strong> and select the <a href="https://github.com/ArthurzWong/design-md-chrome" target="_blank" rel="noopener noreferrer">cloned repo folder</a>. The extractor icon appears in your toolbar.</p>
+      </div>
+    </div>
+    <div class="providers reveal">
+      <span>Then install the generated skill into:</span>
+      <a class="provider-pill" href="https://github.com/ArthurzWong/design-md-chrome#available-actions" target="_blank" rel="noopener noreferrer"><img src="https://cdn.simpleicons.org/claude/D97757" alt="" aria-hidden="true">Claude Code <code>.claude/skills/design-system</code></a>
+      <a class="provider-pill" href="https://github.com/ArthurzWong/design-md-chrome#available-actions" target="_blank" rel="noopener noreferrer"><img src="https://cdn.simpleicons.org/openai/000000" alt="" aria-hidden="true">Codex <code>.agents/skills/design-system</code></a>
+      <a class="provider-pill" href="https://github.com/ArthurzWong/design-md-chrome#available-actions" target="_blank" rel="noopener noreferrer"><img src="https://cdn.simpleicons.org/cursor/000000" alt="" aria-hidden="true">Cursor <code>.cursor/skills/design-system</code></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="section">
+  <div class="container">
+    <div class="cta-band reveal">
+      <h2>Ship on-brand UI every time</h2>
+      <p>Stop re-explaining your design system to every AI session. Extract once, reference forever.</p>
+      <div class="hero-ctas" style="margin-bottom:0">
+        <a class="btn btn-primary" href="#install">Install the extension</a>
+        <a class="btn btn-ghost" href="https://github.com/ArthurzWong/design-md-chrome" target="_blank" rel="noopener noreferrer">Star on GitHub</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="container">
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">D<em>.</em>md</span><span>DESIGN.md extractor</span></a>
+        <p>An open-source Chrome extension that turns any website's visual system into an implementation-ready blueprint for AI coding tools. Built on the TypeUI DESIGN.md format.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col">
+          <h4>Product</h4>
+          <a href="#demo">Live demo</a>
+          <a href="#install">Install</a>
+          <a href="#format">File format</a>
+          <a href="https://github.com/ArthurzWong/design-md-chrome" target="_blank" rel="noopener noreferrer">Source code</a>
+        </div>
+        <div class="foot-col">
+          <h4>Resources</h4>
+          <a href="https://www.typeui.sh/design-md" target="_blank" rel="noopener noreferrer">DESIGN.md spec</a>
+          <a href="https://www.typeui.sh/design-skills" target="_blank" rel="noopener noreferrer">Curated design skills</a>
+          <a href="https://github.com/ArthurzWong/design-md-chrome/issues" target="_blank" rel="noopener noreferrer">Report an issue</a>
+        </div>
+        <div class="foot-col">
+          <h4>Legal</h4>
+          <a href="https://github.com/ArthurzWong/design-md-chrome/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>© 2026 TypeUI community · MIT License</span>
+      <span>Not affiliated with Google. Chrome is a trademark of Google LLC.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Sample extraction data (mirrors the extension's pipeline) ---------- */
+  var SAMPLE = {
+    systemName: "Aurora Analytics",
+    url: "https://demo.aurora-analytics.example",
+    audience: "product teams and design engineers",
+    surface: "marketing site",
+    counts: { sampled: 128, total: 342, typography: 6, colors: 5, spacing: 8, radius: 3, shadows: 2, motion: 3, components: 29 }
+  };
+
+  var TOKENS = {
+    typography: "12px/1.45 caption · 14px/1.5 body-sm · 16px/1.55 body · 20px/1.35 h3 · 28px/1.25 h2 · 40px/1.1 h1",
+    colors: "--ink #16161D · --paper #FDFDFB · --accent #3E63DD · --surface #F1F3F5 · --success #0E9F6E",
+    spacing: "4, 8, 12, 16, 24, 32, 48, 64",
+    rsm: "radius 6/10/999 · shadow sm 0 1px 2px rgba(0,0,0,.06), md 0 8px 24px rgba(0,0,0,.08) · motion 120/200/300ms cubic-bezier(0.2,0,0,1)"
+  };
+
+  function designMd() {
+    return "# " + SAMPLE.systemName + "\n\n" +
+"## Mission\n" +
+"Create implementation-ready, token-driven UI guidance for " + SAMPLE.systemName + " that is optimized for consistency, accessibility, and fast delivery across " + SAMPLE.surface + ".\n\n" +
+"## Brand\n" +
+"- Product/brand: " + SAMPLE.systemName + "\n" +
+"- URL: " + SAMPLE.url + "\n" +
+"- Audience: " + SAMPLE.audience + "\n" +
+"- Product surface: " + SAMPLE.surface + "\n\n" +
+"## Style Foundations\n" +
+"- Visual style: clean, structured, low-noise\n" +
+"- Main font style: system-ui sans-serif, 16px base, -0.01em tracking\n" +
+"- Typography scale: " + TOKENS.typography + "\n" +
+"- Color palette: " + TOKENS.colors + "\n" +
+"- Spacing scale: " + TOKENS.spacing + "\n" +
+"- Radius/shadow/motion tokens: " + TOKENS.rsm + "\n\n" +
+"## Accessibility\n" +
+"- Target: WCAG 2.2 AA\n" +
+"- Keyboard-first interactions required.\n" +
+"- Focus-visible rules required.\n" +
+"- Contrast constraints required.\n\n" +
+"## Writing Tone\n" +
+"Concise, confident, implementation-focused.\n\n" +
+"## Rules: Do\n" +
+"- Use semantic tokens, not raw hex values, in component guidance.\n" +
+"- Every component must define states for default, hover, focus-visible, active, disabled, loading, and error.\n" +
+"- Component behavior should specify responsive and edge-case handling.\n" +
+"- Interactive components must document keyboard, pointer, and touch behavior.\n" +
+"- Accessibility acceptance criteria must be testable in implementation.\n\n" +
+"## Rules: Don't\n" +
+"- Do not allow low-contrast text or hidden focus indicators.\n" +
+"- Do not introduce one-off spacing or typography exceptions.\n" +
+"- Do not use ambiguous labels or non-descriptive actions.\n\n" +
+"## Guideline Authoring Workflow\n" +
+"1. Restate design intent in one sentence.\n" +
+"2. Define foundations and tokens.\n" +
+"3. Define component anatomy, variants, and interactions.\n" +
+"4. Add accessibility acceptance criteria.\n" +
+"5. Add anti-patterns and migration notes.\n" +
+"6. End with QA checklist.\n\n" +
+"## Required Output Structure\n" +
+"- Context and goals\n" +
+"- Design tokens and foundations\n" +
+"- Component-level rules (anatomy, variants, states, responsive behavior)\n" +
+"- Accessibility requirements and testable acceptance criteria\n" +
+"- Content and tone standards with examples\n" +
+"- Anti-patterns and prohibited implementations\n" +
+"- QA checklist\n\n" +
+"## Component Rule Expectations\n" +
+"- Include keyboard, pointer, and touch behavior.\n" +
+"- Include spacing and typography token requirements.\n" +
+"- Include long-content, overflow, and empty-state handling.\n\n" +
+"## Quality Gates\n" +
+"- Every non-negotiable rule uses \"must\".\n" +
+"- Every recommendation uses \"should\".\n" +
+"- Every accessibility rule is testable in implementation.\n" +
+"- Prefer system consistency over local visual exceptions.\n";
+  }
+
+  function skillMd() {
+    return "---\n" +
+"name: design-system-aurora-analytics\n" +
+"description: Creates implementation-ready design-system guidance with tokens, component behavior, and accessibility standards. Use when creating or updating UI rules, component specifications, or design-system documentation.\n" +
+"---\n\n" +
+"<!-- TYPEUI_SH_MANAGED_START -->\n\n" +
+"# " + SAMPLE.systemName + "\n\n" +
+"## Mission\n" +
+"Deliver implementation-ready design-system guidance for " + SAMPLE.systemName + " that can be applied consistently across " + SAMPLE.surface + " interfaces.\n\n" +
+"## Brand\n" +
+"- Product/brand: " + SAMPLE.systemName + "\n" +
+"- URL: " + SAMPLE.url + "\n" +
+"- Audience: " + SAMPLE.audience + "\n" +
+"- Product surface: " + SAMPLE.surface + "\n\n" +
+"## Style Foundations\n" +
+"- Visual style: structured, accessible, implementation-first\n" +
+"- Main font style: system-ui sans-serif, 16px base, -0.01em tracking\n" +
+"- Typography scale: " + TOKENS.typography + "\n" +
+"- Color palette: " + TOKENS.colors + "\n" +
+"- Spacing scale: " + TOKENS.spacing + "\n" +
+"- Radius/shadow/motion tokens: " + TOKENS.rsm + "\n\n" +
+"## Accessibility\n" +
+"- Target: WCAG 2.2 AA\n" +
+"- Keyboard-first interactions required.\n" +
+"- Focus-visible rules required.\n" +
+"- Contrast constraints required.\n\n" +
+"## Writing Tone\n" +
+"concise, confident, implementation-focused\n\n" +
+"## Rules: Do\n" +
+"- Use semantic tokens, not raw hex values in component guidance.\n" +
+"- Define all required states: default, hover, focus-visible, active, disabled, loading, error.\n" +
+"- Specify responsive behavior and edge-case handling.\n\n" +
+"## Rules: Don't\n" +
+"- Do not allow low-contrast text or hidden focus indicators.\n" +
+"- Do not introduce one-off spacing or typography exceptions.\n" +
+"- Do not use ambiguous labels or non-descriptive actions.\n\n" +
+"## Guideline Authoring Workflow\n" +
+"1. Restate design intent in one sentence.\n" +
+"2. Define foundations and tokens.\n" +
+"3. Define component anatomy, variants, and interactions.\n" +
+"4. Add accessibility acceptance criteria.\n" +
+"5. Add anti-patterns and migration notes.\n" +
+"6. End with QA checklist.\n\n" +
+"## Required Output Structure\n" +
+"- Context and goals\n" +
+"- Design tokens and foundations\n" +
+"- Component-level rules (anatomy, variants, states, responsive behavior)\n" +
+"- Accessibility requirements and testable acceptance criteria\n" +
+"- Content and tone standards with examples\n" +
+"- Anti-patterns and prohibited implementations\n" +
+"- QA checklist\n\n" +
+"## Component Rule Expectations\n" +
+"- Include keyboard, pointer, and touch behavior.\n" +
+"- Include spacing and typography token requirements.\n" +
+"- Include long-content, overflow, and empty-state handling.\n\n" +
+"## Quality Gates\n" +
+"- Every non-negotiable rule uses \"must\".\n" +
+"- Every recommendation uses \"should\".\n" +
+"- Every accessibility rule is testable in implementation.\n" +
+"- Prefer system consistency over local visual exceptions.\n\n" +
+"<!-- TYPEUI_SH_MANAGED_END -->\n";
+  }
+
+  /* ---------- DOM ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+  var nav = $("nav");
+  var extractBtn = $("extractBtn");
+  var extractLabel = $("extractLabel");
+  var extractHint = $("extractHint");
+  var stepsEl = $("steps");
+  var chipsEl = $("chips");
+  var outEmpty = $("outEmpty");
+  var outPre = $("outPre");
+  var outMeta = $("outMeta");
+  var copyBtn = $("copyBtn");
+  var copyLabel = $("copyLabel");
+  var downloadBtn = $("downloadBtn");
+  var modeDesignBtn = $("modeDesign");
+  var modeSkillBtn = $("modeSkill");
+  var emptyMode = $("emptyMode");
+
+  var state = { mode: "design", extracted: false, busy: false };
+
+  var STEP_LABELS = ["Style extraction", "Token normalization", "Website profiling", "Blueprint assembly", "Conformance checks"];
+  var STEP_DURATIONS = [560, 480, 520, 500, 420];
+
+  /* ---------- Nav scroll state ---------- */
+  function onScroll() {
+    nav.classList.toggle("scrolled", window.scrollY > 8);
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- Reveal on scroll ---------- */
+  var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var revealEls = document.querySelectorAll(".reveal");
+  if (!reducedMotion && "IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  } else {
+    revealEls.forEach(function (el) { el.classList.add("visible"); });
+  }
+
+  /* ---------- Markdown highlighting (cheap + safe) ---------- */
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function highlight(md) {
+    var lines = escapeHtml(md).split("\n").map(function (line) {
+      if (/^#/.test(line)) return '<span class="md-h">' + line + "</span>";
+      if (/^-\s|^--/.test(line)) return '<span class="md-b">' + line + "</span>";
+      return '<span class="md-t">' + line + "</span>";
+    });
+    return lines.join("\n");
+  }
+
+  /* ---------- Mode switch ---------- */
+  function setMode(mode) {
+    state.mode = mode;
+    modeDesignBtn.classList.toggle("is-active", mode === "design");
+    modeSkillBtn.classList.toggle("is-active", mode === "skill");
+    modeDesignBtn.setAttribute("aria-selected", String(mode === "design"));
+    modeSkillBtn.setAttribute("aria-selected", String(mode === "skill"));
+    emptyMode.textContent = mode === "design" ? "DESIGN.md" : "SKILL.md";
+    if (state.extracted) renderOutput();
+  }
+  modeDesignBtn.addEventListener("click", function () { setMode("design"); });
+  modeSkillBtn.addEventListener("click", function () { setMode("skill"); });
+
+  /* ---------- Output rendering ---------- */
+  function currentMarkdown() {
+    return state.mode === "skill" ? skillMd() : designMd();
+  }
+
+  function renderOutput() {
+    var md = currentMarkdown();
+    outEmpty.hidden = true;
+    outPre.hidden = false;
+    outPre.innerHTML = highlight(md);
+    var lines = md.split("\n").length;
+    var kb = (new Blob([md]).size / 1024).toFixed(1);
+    outMeta.textContent = (state.mode === "skill" ? "SKILL.md" : "DESIGN.md") + " · " + lines + " lines · " + kb + " KB · 9/9 checks passed";
+    copyBtn.disabled = false;
+    downloadBtn.disabled = false;
+  }
+
+  /* ---------- Extraction pipeline ---------- */
+  function setStep(index, status) {
+    var el = stepsEl.querySelector('[data-step="' + index + '"]');
+    if (!el) return;
+    el.classList.remove("active", "done");
+    if (status) el.classList.add(status);
+  }
+
+  function delay(ms) {
+    return new Promise(function (resolve) { setTimeout(resolve, reducedMotion ? 0 : ms); });
+  }
+
+  function renderChips() {
+    var c = SAMPLE.counts;
+    var items = [
+      { label: "<b>" + c.sampled + "</b> elements sampled" },
+      { label: "<b>" + c.typography + "</b> type tokens" },
+      { label: '<span class="sw" style="background:#16161D"></span>ink' },
+      { label: '<span class="sw" style="background:#FDFDFB"></span>paper' },
+      { label: '<span class="sw" style="background:#3E63DD"></span>accent' },
+      { label: '<span class="sw" style="background:#F1F3F5"></span>surface' },
+      { label: '<span class="sw" style="background:#0E9F6E"></span>success' },
+      { label: "<b>" + c.spacing + "</b> spacing steps" },
+      { label: "<b>" + c.radius + "</b> radii" },
+      { label: "<b>" + c.shadows + "</b> shadows" },
+      { label: "<b>" + c.motion + "</b> motion tokens" },
+      { label: "<b>" + c.components + "</b> component signals" },
+      { label: "audience: <b>product teams</b>", plain: true },
+      { label: "surface: <b>" + SAMPLE.surface + "</b>", plain: true },
+      { label: "✓ 9/9 checks passed", pass: true }
+    ];
+    chipsEl.innerHTML = "";
+    items.forEach(function (item, i) {
+      var chip = document.createElement("span");
+      chip.className = "chip" + (item.pass ? " pass" : "");
+      chip.innerHTML = item.label;
+      chip.style.animationDelay = (reducedMotion ? 0 : i * 45) + "ms";
+      chipsEl.appendChild(chip);
+    });
+  }
+
+  async function runExtraction() {
+    if (state.busy) return;
+    state.busy = true;
+    extractBtn.disabled = true;
+    extractBtn.classList.add("busy");
+    extractLabel.textContent = "Extracting…";
+    extractHint.textContent = "Reading the sample page — same pipeline as the extension.";
+    chipsEl.innerHTML = "";
+    outEmpty.hidden = false;
+    outPre.hidden = true;
+    copyBtn.disabled = true;
+    downloadBtn.disabled = true;
+    outMeta.textContent = "waiting for extraction…";
+    stepsEl.hidden = false;
+
+    for (var i = 0; i < STEP_LABELS.length; i++) {
+      setStep(i, "active");
+      await delay(STEP_DURATIONS[i]);
+      setStep(i, "done");
+    }
+
+    state.extracted = true;
+    renderOutput();
+    renderChips();
+
+    state.busy = false;
+    extractBtn.disabled = false;
+    extractBtn.classList.remove("busy");
+    extractLabel.textContent = "Refresh extraction";
+    extractHint.textContent = "Done — switch format above, then copy or download.";
+  }
+
+  extractBtn.addEventListener("click", runExtraction);
+
+  /* ---------- Copy ---------- */
+  function legacyCopy(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  copyBtn.addEventListener("click", async function () {
+    if (!state.extracted) return;
+    var md = currentMarkdown();
+    var ok = false;
+    try {
+      await navigator.clipboard.writeText(md);
+      ok = true;
+    } catch (e) {
+      ok = legacyCopy(md);
+    }
+    if (ok) {
+      copyBtn.classList.add("copied");
+      copyLabel.textContent = "Copied";
+      setTimeout(function () {
+        copyBtn.classList.remove("copied");
+        copyLabel.textContent = "Copy";
+      }, 2000);
+    } else {
+      copyLabel.textContent = "Press ⌘C";
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.selectNodeContents(outPre);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      setTimeout(function () { copyLabel.textContent = "Copy"; }, 2500);
+    }
+  });
+
+  /* ---------- Download ---------- */
+  downloadBtn.addEventListener("click", function () {
+    if (!state.extracted) return;
+    var md = currentMarkdown();
+    var filename = state.mode === "skill" ? "SKILL.md" : "DESIGN.md";
+    var blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    outMeta.textContent = "downloaded " + filename;
+  });
+
+  /* ---------- Keyboard nicety: Enter/Space on focused output ---------- */
+  outPre.addEventListener("keydown", function (e) {
+    if ((e.key === "a" || e.key === "A") && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.selectNodeContents(outPre);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  });
+})();
+</script>
+</body>
+</html>
