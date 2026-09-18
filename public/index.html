@@ -329,6 +329,73 @@
   .icon-btn svg { width: 13px; height: 13px; }
   .icon-btn.copied { background: var(--ok); border-color: var(--ok); color: #fff; }
 
+  /* ---------- Redesign box ---------- */
+  .redesign-box {
+    max-width: 920px; margin: 0 auto;
+    background: var(--bg-raised); border: 1px solid var(--line);
+    border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+    padding: 22px;
+  }
+  .rd-form { display: flex; flex-direction: column; gap: 10px; }
+  .rd-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .rd-input-row {
+    display: flex; align-items: stretch;
+    border: 1.5px solid var(--line-strong); border-radius: 12px;
+    background: #fff; overflow: hidden; transition: border-color .15s ease, box-shadow .15s ease;
+    flex-wrap: wrap;
+  }
+  .rd-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(62,99,221,.12); }
+  .rd-prefix {
+    display: flex; align-items: center; padding: 0 4px 0 14px; color: var(--faint);
+    font-size: 13.5px; user-select: none; border-right: 1px solid var(--line); margin-right: 2px;
+  }
+  #rdUrl {
+    flex: 1; min-width: 180px; border: 0; outline: none; background: transparent;
+    padding: 14px 12px; font-size: 15px; color: var(--ink); font-family: var(--sans);
+  }
+  #rdUrl::placeholder { color: var(--faint); }
+  .rd-go {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--black); color: #fff; border: 0; cursor: pointer;
+    padding: 0 20px; font-size: 13.5px; font-weight: 600;
+    transition: background .15s ease, opacity .15s ease;
+  }
+  .rd-go:hover:not(:disabled) { background: #000; }
+  .rd-go:disabled { opacity: .6; cursor: progress; }
+  .rd-go-spinner { display: none; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  .rd-go.busy .rd-go-spinner { display: inline-block; }
+  .rd-go.busy .rd-go-icon { display: none; }
+  .rd-hint { margin: 0; font-size: 12.5px; color: var(--faint); }
+  .rd-hint .mono { font-size: 11.5px; background: #f0efec; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+  .rd-status {
+    margin-top: 14px; border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.55;
+  }
+  .rd-status[hidden] { display: none; }
+  .rd-status.err { background: #fdf1f1; border: 1px solid #f3d2d2; color: #9f1d1d; }
+  .rd-status.info { background: var(--accent-soft); border: 1px solid #dce3fb; color: var(--accent-ink); }
+  .rd-status .mono { font-size: 11.5px; }
+  .rd-usage { margin-top: 14px; }
+  .rd-usage[hidden] { display: none; }
+  .usage-bar {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    border: 1px dashed var(--line-strong); border-radius: 10px; padding: 9px 14px;
+    background: #fbfaf9;
+  }
+  .usage-text { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+  .usage-link { margin-left: auto; font-size: 12.5px; color: var(--accent-ink); text-decoration: none; font-weight: 600; }
+  .usage-link:hover { text-decoration: underline; }
+  .rd-result { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .rd-result[hidden] { display: none; }
+  .rd-result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .rd-result-title { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); min-width: 0; }
+  .rd-result-title b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40ch; }
+  .rd-host { font-size: 11.5px; color: var(--faint); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+  .rd-fav { width: 16px; height: 16px; border-radius: 4px; background: #eee center/cover no-repeat; flex-shrink: 0; border: 1px solid var(--line); }
+  .rd-actions { display: flex; gap: 8px; }
+  .rd-stats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+  .rd-stats .sw { width: 10px; height: 10px; border-radius: 3px; border: 1px solid rgba(0,0,0,.14); display: inline-block; }
+  .rd-footnote { margin: 10px 0 0; font-size: 12px; color: var(--faint); }
+
   /* ---------- Features ---------- */
   .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .feature {
@@ -433,6 +500,7 @@
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#demo">Live demo</a>
+      <a href="#redesign">Redesign a site</a>
       <a href="#features">Features</a>
       <a href="#format">File format</a>
       <a href="#install">Install</a>
@@ -660,6 +728,66 @@
             Download
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REDESIGN BOX ============ -->
+<section class="section" id="redesign" style="padding-top: 20px;">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="kicker">Redesign mode</span>
+      <h2 class="section-title">Paste any website — get its design DNA</h2>
+      <p class="section-sub">Drop in a URL you want to redesign. We fetch its public HTML &amp; CSS, extract real design tokens, and generate a DESIGN.md you can hand to Claude, Codex, or Cursor to rebuild it faithfully.</p>
+    </div>
+
+    <div class="redesign-box reveal">
+      <form class="rd-form" id="rdForm">
+        <label class="rd-label" for="rdUrl">Website URL</label>
+        <div class="rd-input-row">
+          <span class="rd-prefix mono" aria-hidden="true">https://</span>
+          <input id="rdUrl" name="url" type="text" inputmode="url" autocomplete="url" spellcheck="false"
+                 placeholder="stripe.com  ·  linear.app  ·  yoursite.com" aria-describedby="rdHint" />
+          <button class="rd-go" id="rdGo" type="submit">
+            <span class="rd-go-spinner" aria-hidden="true"></span>
+            <svg class="rd-go-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-2 9h6l-8 11 2-9H5l8-11z"/></svg>
+            <span id="rdGoLabel">Extract design</span>
+          </button>
+        </div>
+        <p class="rd-hint" id="rdHint">Paste with or without <span class="mono">https://</span> — we fetch only public pages; private and internal hosts are blocked for safety.</p>
+      </form>
+
+      <div class="rd-status" id="rdStatus" hidden aria-live="polite"></div>
+
+      <div class="rd-usage" id="rdUsage" hidden>
+        <div class="usage-bar">
+          <span class="usage-text" id="usageText"></span>
+          <a class="usage-link" href="#install">Unlimited on any tab → get the Chrome extension</a>
+        </div>
+      </div>
+
+      <div class="rd-result" id="rdResult" hidden>
+        <div class="rd-result-head">
+          <div class="rd-result-title">
+            <span class="rd-fav" id="rdFav" aria-hidden="true"></span>
+            <b id="rdTitle">—</b>
+            <span class="rd-host mono" id="rdHost"></span>
+          </div>
+          <div class="rd-actions">
+            <button class="icon-btn" id="rdCopy" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span id="rdCopyLabel">Copy</span>
+            </button>
+            <button class="icon-btn" id="rdDownload" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+          </div>
+        </div>
+        <div class="rd-stats" id="rdStats" aria-live="polite"></div>
+        <pre class="out" id="rdPre" tabindex="0" aria-label="Generated DESIGN.md"></pre>
+        <p class="rd-footnote">Generated from the page's public HTML &amp; CSS. For computed styles, hover states, and full token coverage, run the Chrome extension on the live tab.</p>
       </div>
     </div>
   </div>
@@ -1179,6 +1307,147 @@
     document.body.removeChild(a);
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
     outMeta.textContent = "downloaded " + filename;
+  });
+
+  /* ---------- Redesign box (URL → DESIGN.md via /api/extract) ---------- */
+  var rdForm = $("rdForm");
+  var rdUrl = $("rdUrl");
+  var rdGo = $("rdGo");
+  var rdGoLabel = $("rdGoLabel");
+  var rdStatus = $("rdStatus");
+  var rdUsage = $("rdUsage");
+  var rdResult = $("rdResult");
+  var rdTitle = $("rdTitle");
+  var rdHost = $("rdHost");
+  var rdFav = $("rdFav");
+  var rdStats = $("rdStats");
+  var rdPre = $("rdPre");
+  var rdCopy = $("rdCopy");
+  var rdCopyLabel = $("rdCopyLabel");
+  var rdDownload = $("rdDownload");
+  var usageText = $("usageText");
+
+  var rdState = { markdown: "", filename: "DESIGN.md", busy: false };
+  var rdSearches = 0;
+  var RD_FREE_LIMIT = 3;
+  var usageShown = false;
+
+  function showRdStatus(kind, html) {
+    rdStatus.hidden = false;
+    rdStatus.className = "rd-status " + kind;
+    rdStatus.innerHTML = html;
+  }
+  function hideRdStatus() { rdStatus.hidden = true; rdStatus.innerHTML = ""; }
+
+  function updateUsage() {
+    if (!usageShown) return;
+    var left = Math.max(0, RD_FREE_LIMIT - rdSearches);
+    usageText.textContent = left > 0
+      ? "This session: " + left + " of " + RD_FREE_LIMIT + " free extractions left."
+      : "Free session limit reached.";
+    rdUsage.hidden = false;
+  }
+
+  function normalizeRdUrl(value) {
+    var v = String(value || "").trim();
+    if (!v) return "";
+    if (!/^https?:\/\//i.test(v)) v = "https://" + v;
+    return v;
+  }
+
+  function isValidHttpUrl(value) {
+    try {
+      var u = new URL(value);
+      return /^https?:$/.test(u.protocol) && u.hostname.indexOf(".") > -1;
+    } catch (_) { return false; }
+  }
+
+  rdForm.addEventListener("submit", function (e) { e.preventDefault(); runRedesign(); });
+
+  async function runRedesign() {
+    if (rdState.busy) return;
+    var target = normalizeRdUrl(rdUrl.value);
+    if (!target) { showRdStatus("err", "Please paste a website address first."); rdUrl.focus(); return; }
+    if (!isValidHttpUrl(target)) { showRdStatus("err", "That doesn't look like a valid URL — try <span class=\"mono\">example.com</span>."); return; }
+    if (rdSearches >= RD_FREE_LIMIT) {
+      showRdStatus("info", "You've used all " + RD_FREE_LIMIT + " free extractions this session. The Chrome extension does this unlimited, on any tab, with live computed styles.");
+      return;
+    }
+
+    rdState.busy = true;
+    rdGo.disabled = true;
+    rdGo.classList.add("busy");
+    rdGoLabel.textContent = "Extracting…";
+    hideRdStatus();
+    rdResult.hidden = true;
+    showRdStatus("info", "Fetching the page and pulling out design tokens…");
+
+    var t0 = Date.now();
+    try {
+      var res = await fetch("/api/extract?url=" + encodeURIComponent(target));
+      var data = await res.json().catch(function () { return null; });
+      if (!res.ok || !data || !data.ok) {
+        var msg = data && data.error ? data.error : "Extraction failed (" + res.status + "). Try another URL.";
+        showRdStatus("err", escapeHtml(msg));
+        return;
+      }
+      rdSearches++;
+      usageShown = true;
+      updateUsage();
+      rdState.markdown = data.markdown;
+      rdState.filename = "DESIGN.md";
+      rdTitle.textContent = data.title || "Untitled site";
+      rdHost.textContent = data.hostname || "";
+      rdFav.style.backgroundImage = data.hostname ? 'url("https://icons.duckduckgo.com/ip3/' + data.hostname + '.ico")' : "none";
+      var s = data.stats || {};
+      var chips = [
+        "<b>" + (s.colors || 0) + "</b> colors",
+        "<b>" + (s.fontSizes || 0) + "</b> font sizes",
+        "<b>" + (s.spacing || 0) + "</b> spacing values",
+        "<b>" + (s.radii || 0) + "</b> radii",
+        "<b>" + (s.shadows || 0) + "</b> shadows",
+        "<b>" + (s.durations || 0) + "</b> motion tokens"
+      ];
+      rdStats.innerHTML = chips.map(function (c) { return '<span class="chip">' + c + "</span>"; }).join("");
+      rdPre.innerHTML = highlight(data.markdown);
+      rdResult.hidden = false;
+      rdCopy.disabled = false;
+      rdDownload.disabled = false;
+      var secs = ((Date.now() - t0) / 1000).toFixed(1);
+      showRdStatus("info", "Done in " + secs + "s — a live DESIGN.md generated from the site's own styles.");
+    } catch (err) {
+      showRdStatus("err", "Network error — couldn't reach the extraction service. Please try again.");
+    } finally {
+      rdState.busy = false;
+      rdGo.disabled = false;
+      rdGo.classList.remove("busy");
+      rdGoLabel.textContent = "Extract design";
+    }
+  }
+
+  rdCopy.addEventListener("click", async function () {
+    if (!rdState.markdown) return;
+    var ok = false;
+    try { await navigator.clipboard.writeText(rdState.markdown); ok = true; }
+    catch (e) { ok = legacyCopy(rdState.markdown); }
+    if (ok) {
+      rdCopy.classList.add("copied");
+      rdCopyLabel.textContent = "Copied";
+      setTimeout(function () { rdCopy.classList.remove("copied"); rdCopyLabel.textContent = "Copy"; }, 2000);
+    }
+  });
+
+  rdDownload.addEventListener("click", function () {
+    if (!rdState.markdown) return;
+    var blob = new Blob([rdState.markdown], { type: "text/markdown;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = rdState.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   });
 
   /* ---------- Keyboard nicety: Enter/Space on focused output ---------- */
